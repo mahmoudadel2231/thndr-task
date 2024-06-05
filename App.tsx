@@ -5,62 +5,20 @@
  * @format
  */
 
-import React, {useEffect} from 'react';
-import type {PropsWithChildren} from 'react';
-import {
-  SafeAreaView,
-  ScrollView,
-  StatusBar,
-  StyleSheet,
-  Text,
-  useColorScheme,
-  View,
-} from 'react-native';
+import axios from 'axios';
+import React, {useEffect, useState} from 'react';
+import {FlatList, SafeAreaView, StyleSheet, Text, View} from 'react-native';
 
-import {
-  Colors,
-  DebugInstructions,
-  Header,
-  LearnMoreLinks,
-  ReloadInstructions,
-} from 'react-native/Libraries/NewAppScreen';
 import BootSplash from 'react-native-bootsplash';
 
-type SectionProps = PropsWithChildren<{
-  title: string;
-}>;
+// 2zxx0GM3tl_mRMrpzcmwol6IiqCWiq3K
+// /v3/reference/tickers
+// https://api.polygon.io/v2/aggs/ticker/AAPL/range/1/day/2023-01-09/2023-01-09?apiKey=2zxx0GM3tl_mRMrpzcmwol6IiqCWiq3K
 
 type hide = (config?: {fade?: boolean}) => Promise<void>;
 
-function Section({children, title}: SectionProps): React.JSX.Element {
-  const isDarkMode = useColorScheme() === 'dark';
-
-  return (
-    <View style={styles.sectionContainer}>
-      <Text
-        style={[
-          styles.sectionTitle,
-          {
-            color: isDarkMode ? Colors.white : Colors.black,
-          },
-        ]}>
-        {title}
-      </Text>
-      <Text
-        style={[
-          styles.sectionDescription,
-          {
-            color: isDarkMode ? Colors.light : Colors.dark,
-          },
-        ]}>
-        {children}
-      </Text>
-    </View>
-  );
-}
-
 function App(): React.JSX.Element {
-  const isDarkMode = useColorScheme() === 'dark';
+  const [data, setData] = useState();
   useEffect(() => {
     const init = async () => {
       // …do multiple sync or async tasks
@@ -72,40 +30,35 @@ function App(): React.JSX.Element {
     });
   }, []);
 
-  const backgroundStyle = {
-    backgroundColor: isDarkMode ? Colors.darker : Colors.lighter,
-  };
+  useEffect(() => {
+    axios
+      .get('https://api.polygon.io/v3/reference/tickers?active=true', {
+        params: {
+          limit: 1000,
+          apiKey: '2zxx0GM3tl_mRMrpzcmwol6IiqCWiq3K',
+        },
+      })
+      .then(response => {
+        setData(response.data.results);
+        console.log(response.data);
+      })
+      .catch(err => {
+        console.log('err', err);
+      });
+  }, []);
 
   return (
-    <SafeAreaView style={backgroundStyle}>
-      <StatusBar
-        barStyle={isDarkMode ? 'light-content' : 'dark-content'}
-        backgroundColor={backgroundStyle.backgroundColor}
+    <SafeAreaView style={{backgroundColor: '#1f202f', flex: 1}}>
+      <FlatList
+        data={data}
+        renderItem={item => {
+          return (
+            <View>
+              <Text style={{color: 'white'}}>{item.item?.name}</Text>
+            </View>
+          );
+        }}
       />
-      <ScrollView
-        contentInsetAdjustmentBehavior="automatic"
-        style={backgroundStyle}>
-        <Header />
-        <View
-          style={{
-            backgroundColor: isDarkMode ? Colors.black : Colors.white,
-          }}>
-          <Section title="Step One">
-            Edit <Text style={styles.highlight}>App.tsx</Text> to change this
-            screen and then come back to see your edits.
-          </Section>
-          <Section title="See Your Changes">
-            <ReloadInstructions />
-          </Section>
-          <Section title="Debug">
-            <DebugInstructions />
-          </Section>
-          <Section title="Learn More">
-            Read the docs to discover what to do next:
-          </Section>
-          <LearnMoreLinks />
-        </View>
-      </ScrollView>
     </SafeAreaView>
   );
 }
