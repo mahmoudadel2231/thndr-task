@@ -12,12 +12,10 @@ import Companies from '../redux/Companies';
 
 import {TCompany} from '../redux/Companies/model';
 
-const CompanyItem = ({id}: {id: EntityId}) => {
+const CompanyItem = ({id}: {id?: EntityId}) => {
   const singleProductItem = useSelector(state =>
     Companies.selectors.selectById(state, id),
   ) as TCompany;
-
-  // console.log('singleProductItem', id, singleProductItem);
 
   return (
     <View style={styles.companyContainer}>
